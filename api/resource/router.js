@@ -1,26 +1,30 @@
-const express = require('express');
-const Resources = require('../models/Resource');
+const router = require('express').Router();
+const Resource = require('./model');
 
-const router = express.Router();
-
-router.get('/', async (req, res) => {
-  try {
-    const resources = await Resources.getResources();
-    res.json(resources);
-  } catch (err) {
-    res.status(500).json({ message: 'Failed to get resources' });
-  }
+router.get('/', async (req, res, next) => {
+    try {
+        const resources = await Resource.getAll();
+        res.status(200).json(resources);
+    } catch (error) {
+        next(error);
+    }
 });
 
-router.post('/', async (req, res) => {
-  const resourceData = req.body;
-
-  try {
-    const newResource = await Resources.createResource(resourceData);
-    res.status(201).json(newResource);
-  } catch (err) {
-    res.status(500).json({ message: 'Failed to create new resource' });
-  }
+router.post('/', async (req, res, next) => {
+    try {
+        const newResource = await Resource.createResource(req.body);
+        res.status(201).json(newResource);
+    } catch (error) {
+        next(error);
+    }
 });
 
+router.use('*', (req, res) => {
+    res.status(404).json({
+        error: 'Not Found!',
+        message: 'The route you wanted ain\'t here, bro. Try again.',
+    });
+});
+
+module.exports = router;
 module.exports = router;

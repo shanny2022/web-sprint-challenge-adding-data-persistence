@@ -1,26 +1,34 @@
-const express = require('express');
-const Projects = require('../models/Project');
+const router = require('express').Router()
 
-const router = express.Router();
+const Project = require('./model')
 
-router.get('/', async (req, res) => {
-  try {
-    const projects = await Projects.getProjects();
-    res.json(projects);
-  } catch (err) {
-    res.status(500).json({ message: 'Failed to get projects' });
-  }
+router.get('/', async (req, res, next) => {
+    try {
+        const projects = await Project.getAll()
+        res.status(200).json(projects)
+    }
+    catch (error) {
+        next(error)
+    }
+})
+
+router.post('/', async (req, res, next) => {
+    try {
+        const newProject = await Project.createProject(req.body);
+        res.status(201).json(newProject);
+    } catch (error) {
+        next(error);
+    }
 });
 
-router.post('/', async (req, res) => {
-  const projectData = req.body;
 
-  try {
-    const newProject = await Projects.createProject(projectData);
-    res.status(201).json(newProject);
-  } catch (err) {
-    res.status(500).json({ message: 'Failed to create new project' });
-  }
-});
+router.use('*', (req, res) => {
+    res.status(404).json({
+        error: 'Not Found!',
+        message: 'The route you wanted aint here bro, try again'
+    })
+})
 
-module.exports = router;
+
+
+module.exports = router

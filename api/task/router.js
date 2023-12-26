@@ -1,26 +1,30 @@
-const express = require('express');
-const Tasks = require('../models/Task');
+const router = require('express').Router();
+const Task = require('./model');
 
-const router = express.Router();
-
-router.get('/', async (req, res) => {
-  try {
-    const tasks = await Tasks.getTasks();
-    res.json(tasks);
-  } catch (err) {
-    res.status(500).json({ message: 'Failed to get tasks' });
-  }
+router.get('/', async (req, res, next) => {
+    try {
+        const tasks = await Task.getAll();
+        console.log(tasks)
+        res.status(200).json(tasks);
+    } catch (error) {
+        next(error);
+    }
 });
 
-router.post('/', async (req, res) => {
-  const taskData = req.body;
+router.post('/', async (req, res, next) => {
+    try {
+        const newTask = await Task.createTask(req.body);
+        res.status(201).json(newTask);
+    } catch (error) {
+        next(error);
+    }
+});
 
-  try {
-    const newTask = await Tasks.createTask(taskData);
-    res.status(201).json(newTask);
-  } catch (err) {
-    res.status(500).json({ message: 'Failed to create new task' });
-  }
+router.use('*', (req, res) => {
+    res.status(404).json({
+        error: 'Not Found!',
+        message: 'The route you wanted ain\'t here, bro. Try again.',
+    });
 });
 
 module.exports = router;
